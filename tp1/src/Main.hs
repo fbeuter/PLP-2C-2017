@@ -7,8 +7,27 @@ import Test.HUnit
 
 {- Función a implementar. -}
 
-búsquedaDelTesoro::Eq a=>a->(a->Bool)->Diccionario a a->Maybe a 
-búsquedaDelTesoro = undefined
+--En este caso el iterate lo que hace es crear la lista infinita de pistas y sus resultados a partir de la pista inicial,
+--a esta lista se la recorre con foldr. Se utilizo este tipo de fold ya que por la evaluacion lazy el mismo funcion sobre
+--listas infinitas, la funcion del fold se encarga de chequear si es una pista o un tesoro, en caso de tener una pista no
+--definida se retorna Nothing dando por finalizada la busqueda, si es un tesoro tambien se detiene la recursion y se retorna
+--el valor, por ultimo, si es una pista valida y aun no se llego al tesoro, se continua la busqueda con la proxima pista.
+listaDePistas::Eq a=>a->Diccionario a a->[Maybe a]
+listaDePistas pista dict = iterate (\pista -> case pista of
+                                                Nothing -> Nothing
+                                                Just datoPista -> obtener datoPista dict)
+                                   (Just pista)
+
+busquedaDelTesoro::Eq a=>a->(a->Bool)->Diccionario a a->Maybe a 
+busquedaDelTesoro pista esTesoro dict = foldr (\datoBusqueda rec -> case datoBusqueda of
+                                                                        Nothing -> Nothing
+                                                                        Just dato -> if (esTesoro dato) then
+                                                                                            Just dato
+                                                                                        else
+                                                                                            rec)
+                                              Nothing
+                                              (listaDePistas pista dict)
+
 
 {- Diccionarios de prueba: -}
 
@@ -73,6 +92,6 @@ testsEj9 = test [
   ]
   
 testsEj10 = test [
-  0 ~=? 0 
-  --Just "alfajor" ~=? búsquedaDelTesoro "inicio" ((=='a').head) dicc2
+  Just "alfajor" ~=? busquedaDelTesoro "inicio" ((=='a').head) dicc2,
+  Nothing ~=? busquedaDelTesoro "inicio" ((=='w').head) dicc2
   ]
