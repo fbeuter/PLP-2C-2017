@@ -70,21 +70,25 @@ incrementarHojas = mapA23 (+1) id
 
 --Trunca el árbol hasta un determinado nivel. Cuando llega a 0, reemplaza el resto del árbol por una hoja con el valor indicado.
 --Funciona para árboles infinitos.
+
+-----------------AUX------------------
 foldNat :: (Integer -> b -> b) -> b -> Integer -> b
 foldNat f g 0 = g
 foldNat f g n = f n (foldNat f g (n-1))
+----------------FINAUX----------------
 
--- potencia a b = foldNat (\_ rec -> a * rec) 1 b
--- la hize con una recursion "no explicita" medio turbia, no se cuan correcto es esto, pero no entendi la sugerencia del enunciado
 truncar::a->Integer->Arbol23 a b->Arbol23 a b
-truncar h n arb = if n==0 then (Hoja h)
-                  else case arb of
-                    (Tres d1 d2 a1 a2 a3) -> (Tres d1 d2 (truncar h (n-1) a1)
-                                                         (truncar h (n-1) a2)
-                                                         (truncar h (n-1) a3))
-                    (Dos d a1 a2)         -> (Dos d (truncar h (n-1) a1)
-                                                    (truncar h (n-1) a2))
-                    (Hoja d)              -> (Hoja d)
+truncar h n árbol = foldNat f g n árbol
+  where {
+    f = \ _ rec -> 
+          \ arb -> 
+            case arb of 
+              Tres d1 d2 a1 a2 a3 -> Tres d1 d2 (rec a1) (rec a2) (rec a3)
+              Dos d a1 a2 -> Dos d (rec a1) (rec a2)
+              Hoja d -> Hoja d
+    ;
+    g = (\ _ -> Hoja h)
+  }
 
 --Evalúa las funciones tomando los valores de los hijos como argumentos.
 --En el caso de que haya 3 hijos, asocia a izquierda.
