@@ -76,7 +76,7 @@ allTests = test [
   "ejercicio3" ~: testsEj3,
   "ejercicio4" ~: testsEj4,
   "ejercicio5" ~: testsEj5,
-  "ejercicio8" ~: testsEj678,
+  "ejercicios678" ~: testsEj678,
   "ejercicio9" ~: testsEj9,
   "ejercicio10" ~: testsEj10
   ]
