@@ -76,9 +76,7 @@ allTests = test [
   "ejercicio3" ~: testsEj3,
   "ejercicio4" ~: testsEj4,
   "ejercicio5" ~: testsEj5,
-  "ejercicio6" ~: testsEj6,
-  "ejercicio7" ~: testsEj7,
-  "ejercicio8" ~: testsEj8,
+  "ejercicio8" ~: testsEj678,
   "ejercicio9" ~: testsEj9,
   "ejercicio10" ~: testsEj10
   ]
@@ -124,15 +122,9 @@ testsEj5 = test [
   22 ~=? evaluar (truncar 0 6 arbolito3)
   ]
 
-testsEj6 = test [
-  0 ~=? 0
-  ]
-
-testsEj7 = test [
-    0 ~=? 0 --Cambiar esto por tests verdaderos.
-  ]
-
-testsEj8 = test [
+--Para testear cada una de estas funciones se requiere utilizar a la otra por lo que decidimo
+--testearlas de forma conjunta
+testsEj678 = test [
   (Nothing::Maybe Int) ~=? obtener (1::Int) (vacio (<)),
   (Just 42::Maybe Int) ~=? obtener 'a' (definir 'a' (42::Int) (vacio (<))),
   (Nothing::Maybe Int) ~=? obtener 'b' (definir 'a' (42::Int) (vacio (<))),
