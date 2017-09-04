@@ -67,6 +67,8 @@ mapA23 f g = foldA23  (\d1 d2 r1 r2 r3 -> Tres (g d1) (g d2) r1 r2 r3)
 incrementarHojas::Num a =>Arbol23 a b->Arbol23 a b
 incrementarHojas = mapA23 (+1) id
 
+incrementarInternos::Num b =>Arbol23 a b->Arbol23 a b
+incrementarInternos = mapA23 id (+1)
 
 --Trunca el árbol hasta un determinado nivel. Cuando llega a 0, reemplaza el resto del árbol por una hoja con el valor indicado.
 --Funciona para árboles infinitos.
@@ -97,23 +99,5 @@ evaluar = foldA23 (\op1 op2 val1 val2 val3 -> op2 (op1 val1 val2) val3)
                   (\op val1 val2 -> op val1 val2)
                   (\val -> val)
 
---Ejemplo:
+                  --Ejemplo:
 --evaluar (truncar 0 6 arbolito3) = 22 = (1*2-3)+(2*3-4)+(3*4-5)+(4*5-6)
-
-{- Árboles de ejemplo. -}
-arbolito1::Arbol23 Char Int
-arbolito1 = Tres 0 1
-        (Dos 2 (Hoja 'a') (Hoja 'b'))
-        (Tres 3 4 (Hoja 'c') (Hoja 'd') (Dos 5 (Hoja 'e') (Hoja 'f')))
-        (Dos 6 (Hoja 'g') (Dos 7 (Hoja 'h') (Hoja 'i')))
-
-arbolito2::Arbol23 Int Bool
-arbolito2 = Dos True (Hoja (-1)) (Tres False True (Hoja 0) (Hoja (-2)) (Hoja 4))
-
-arbolito3::Arbol23 Int (Int->Int->Int)
-arbolito3 = Dos (+) (Tres (*) (-) (Hoja 1) (Hoja 2) (Hoja 3)) (incrementarHojas arbolito3)
-
-arbolito4::Arbol23 Int Char
-arbolito4 = Dos 'p' (Dos 'l' (Dos 'g' (Hoja 5) (Hoja 2)) (Tres 'r' 'a' (Hoja 0)(Hoja 1)(Hoja 12))) 
-                    (Dos 'p' (Tres 'n' 'd' (Hoja (-3))(Hoja 4)(Hoja 9)) (Dos 'e' (Hoja 20)(Hoja 7)))
-
