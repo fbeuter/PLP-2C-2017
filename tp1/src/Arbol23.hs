@@ -68,6 +68,9 @@ incrementarHojas::Num a =>Arbol23 a b->Arbol23 a b
 incrementarHojas = mapA23 (+1) id
 
 
+duplicarElementos::Arbol23 Char Int -> Arbol23 String Int
+duplicarElementos = mapA23 (\x->[x]++[x]) (\x->x*2)
+
 --Trunca el árbol hasta un determinado nivel. Cuando llega a 0, reemplaza el resto del árbol por una hoja con el valor indicado.
 --Funciona para árboles infinitos.
 
@@ -96,6 +99,11 @@ evaluar::Arbol23 a (a->a->a)->a
 evaluar = foldA23 (\op1 op2 val1 val2 val3 -> op2 (op1 val1 val2) val3)
                   (\op val1 val2 -> op val1 val2)
                   (\val -> val)
+
+--Funcion definida para calcular altura de un arbol
+--Es utilizada para testear algunas de las funciones
+altura::Arbol23 a b -> Integer
+altura a = foldA23 (\_ _ r1 r2 r3 -> 1 + (max (max r1 r2) r3)) (\_ r1 r2 -> 1 + (max r1 r2)) (\_->0) a
 
 --Ejemplo:
 --evaluar (truncar 0 6 arbolito3) = 22 = (1*2-3)+(2*3-4)+(3*4-5)+(4*5-6)

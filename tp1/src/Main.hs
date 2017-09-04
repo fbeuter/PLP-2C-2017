@@ -40,6 +40,9 @@ dicc2 = definirVarias [("inicio","casa"),("auto","flores"),("calle","auto"),("ca
 dicc3::Diccionario Int String
 dicc3 = definirVarias [(0,"Hola"),(-10,"Chau"),(15,"Felicidades"),(2,"etc."),(9,"a")] (vacio (\x y->x `mod` 5 < y `mod` 5))
 
+dicc4::Diccionario Int String
+dicc4 = definirVarias [(1,"a"),(2,"b")] (vacio (<))
+
 --Ejecución de los tests
 main :: IO Counts
 main = do runTestTT allTests
@@ -58,25 +61,37 @@ allTests = test [
 
 testsEj2 = test [
   [0,1,2,3,4,5,6,7] ~=? internos arbolito1,
-  "abcdefghi" ~=? hojas arbolito1,
   [True,False,True] ~=? internos arbolito2,
-  [1,2,3,2,3,4,3,4,5,4] ~=? take 10 (hojas arbolito3)
+  "abcdefghi" ~=? hojas arbolito1,
+  [1,2,3,2,3,4,3,4,5,4] ~=? take 10 (hojas arbolito3),
+  True ~=? esHoja (Hoja "a"),
+  False ~=? esHoja arbolito1
   ]
 
 testsEj3 = test [
-  [0,1,-1,5] ~=? hojas (incrementarHojas arbolito2)
+  [0,1,-1,5] ~=? hojas (incrementarHojas arbolito2),
+  [True,False,True] ~=? internos (incrementarHojas arbolito2),
+  [0,2,4,6,8,10,12,14] ~=? internos (duplicarElementos arbolito1),
+  ["aa","bb","cc","dd","ee","ff","gg","hh","ii"] ~=? hojas (duplicarElementos arbolito1)
   ]
 
 testsEj4 = test [
-  [1,2,3,2,3,4,3,4,5,4,5,6,0,0,0,0,0] ~=? hojas (truncar 0 6 arbolito3)
+  [1,2,3,2,3,4,3,4,5,4,5,6,0,0,0,0,0] ~=? hojas (truncar 0 6 arbolito3),
+  6 ~=? altura (truncar 0 6 arbolito3),
+  1 ~=? altura (truncar 0 1 arbolito3),
+  [0] ~=? hojas (truncar 0 0 arbolito3),
+  0 ~=? altura (truncar 0 0 arbolito3)
   ]
 
 testsEj5 = test [
+  -1 ~=? evaluar (truncar 0 3 arbolito3),
+  1 ~=? evaluar (truncar 0 4 arbolito3),
+  8 ~=? evaluar (truncar 0 5 arbolito3),
   22 ~=? evaluar (truncar 0 6 arbolito3)
   ]
 
 testsEj6 = test [
-  0 ~=? 0 --Cambiar esto por tests verdaderos.
+  0 ~=? 0
   ]
 
 testsEj7 = test [
@@ -84,13 +99,22 @@ testsEj7 = test [
   ]
 
 testsEj8 = test [
-  0 ~=? 0 --Cambiar esto por tests verdaderos.
+  (Nothing::Maybe Int) ~=? obtener (1::Int) (vacio (<)),
+  (Just 42::Maybe Int) ~=? obtener 'a' (definir 'a' (42::Int) (vacio (<))),
+  (Nothing::Maybe Int) ~=? obtener 'b' (definir 'a' (42::Int) (vacio (<))),
+  (Just 43::Maybe Int) ~=? obtener 'b' (definir 'b' (43::Int) (definir 'a' (42::Int) (vacio (<))))
   ]
+
+
   
 testsEj9 = test [
-  0 ~=? 0 --Cambiar esto por tests verdaderos.
+  [-10,0,2,9,15] ~=? claves dicc1,
+  ["auto","calle","casa","escalera","inicio","ropero"] ~=? claves dicc2,
+  [15,-10,0,2,9] ~=? claves dicc3,
+  [1,2] ~=? claves dicc4
   ]
-  
+
+
 testsEj10 = test [
   Just "alfajor" ~=? busquedaDelTesoro "inicio" ((=='a').head) dicc2,
   Nothing ~=? busquedaDelTesoro "inicio" ((=='w').head) dicc2

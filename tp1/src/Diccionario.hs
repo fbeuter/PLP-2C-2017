@@ -117,17 +117,3 @@ claves::Diccionario clave valor->[clave]
 claves dict = case (estructura dict) of 
                 Nothing -> []
                 Just (estr) -> map fst (hojas estr)
-
-{- Diccionarios de prueba: -}
-
-dicc1::Diccionario Int String
-dicc1 = definirVarias [(0,"Hola"),(-10,"Chau"),(15,"Felicidades"),(2,"etc."),(9,"a")] (vacio (<))
-
-dicc2::Diccionario String String
-dicc2 = definirVarias [("inicio","casa"),("auto","flores"),("calle","auto"),("casa","escalera"),("ropero","alfajor"),("escalera","ropero")] (vacio (<))
-
-dicc3::Diccionario Int String
-dicc3 = definirVarias [(0,"Hola"),(-10,"Chau"),(15,"Felicidades"),(2,"etc."),(9,"a")] (vacio (\x y->x `mod` 5 < y `mod` 5))
-
-dicc4::Diccionario Int String
-dicc4 = definirVarias [(1,"a"),(2,"b")] (vacio (<))
