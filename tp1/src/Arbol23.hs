@@ -67,24 +67,33 @@ mapA23 f g = foldA23  (\d1 d2 r1 r2 r3 -> Tres (g d1) (g d2) r1 r2 r3)
 incrementarHojas::Num a =>Arbol23 a b->Arbol23 a b
 incrementarHojas = mapA23 (+1) id
 
+incrementarInternos::Num b =>Arbol23 a b->Arbol23 a b
+incrementarInternos = mapA23 id (+1)
+
+duplicarElementos::Arbol23 Char Int -> Arbol23 String Int
+duplicarElementos = mapA23 (\x->[x]++[x]) (\x->x*2)
 
 --Trunca el árbol hasta un determinado nivel. Cuando llega a 0, reemplaza el resto del árbol por una hoja con el valor indicado.
 --Funciona para árboles infinitos.
+
+-----------------AUX------------------
 foldNat :: (Integer -> b -> b) -> b -> Integer -> b
 foldNat f g 0 = g
 foldNat f g n = f n (foldNat f g (n-1))
+----------------FINAUX----------------
 
--- potencia a b = foldNat (\_ rec -> a * rec) 1 b
--- la hize con una recursion "no explicita" medio turbia, no se cuan correcto es esto, pero no entendi la sugerencia del enunciado
 truncar::a->Integer->Arbol23 a b->Arbol23 a b
-truncar h n arb = if n==0 then (Hoja h)
-                  else case arb of
-                    (Tres d1 d2 a1 a2 a3) -> (Tres d1 d2 (truncar h (n-1) a1)
-                                                         (truncar h (n-1) a2)
-                                                         (truncar h (n-1) a3))
-                    (Dos d a1 a2)         -> (Dos d (truncar h (n-1) a1)
-                                                    (truncar h (n-1) a2))
-                    (Hoja d)              -> (Hoja d)
+truncar h n árbol = foldNat f g n árbol
+  where {
+    f = \ _ rec -> 
+          \ arb -> 
+            case arb of 
+              Tres d1 d2 a1 a2 a3 -> Tres d1 d2 (rec a1) (rec a2) (rec a3)
+              Dos d a1 a2 -> Dos d (rec a1) (rec a2)
+              Hoja d -> Hoja d
+    ;
+    g = (\ _ -> Hoja h)
+  }
 
 --Evalúa las funciones tomando los valores de los hijos como argumentos.
 --En el caso de que haya 3 hijos, asocia a izquierda.
@@ -93,23 +102,10 @@ evaluar = foldA23 (\op1 op2 val1 val2 val3 -> op2 (op1 val1 val2) val3)
                   (\op val1 val2 -> op val1 val2)
                   (\val -> val)
 
+--Funcion definida para calcular altura de un arbol
+--Es utilizada para testear algunas de las funciones
+altura::Arbol23 a b -> Integer
+altura a = foldA23 (\_ _ r1 r2 r3 -> 1 + (max (max r1 r2) r3)) (\_ r1 r2 -> 1 + (max r1 r2)) (\_->0) a
+
 --Ejemplo:
 --evaluar (truncar 0 6 arbolito3) = 22 = (1*2-3)+(2*3-4)+(3*4-5)+(4*5-6)
-
-{- Árboles de ejemplo. -}
-arbolito1::Arbol23 Char Int
-arbolito1 = Tres 0 1
-        (Dos 2 (Hoja 'a') (Hoja 'b'))
-        (Tres 3 4 (Hoja 'c') (Hoja 'd') (Dos 5 (Hoja 'e') (Hoja 'f')))
-        (Dos 6 (Hoja 'g') (Dos 7 (Hoja 'h') (Hoja 'i')))
-
-arbolito2::Arbol23 Int Bool
-arbolito2 = Dos True (Hoja (-1)) (Tres False True (Hoja 0) (Hoja (-2)) (Hoja 4))
-
-arbolito3::Arbol23 Int (Int->Int->Int)
-arbolito3 = Dos (+) (Tres (*) (-) (Hoja 1) (Hoja 2) (Hoja 3)) (incrementarHojas arbolito3)
-
-arbolito4::Arbol23 Int Char
-arbolito4 = Dos 'p' (Dos 'l' (Dos 'g' (Hoja 5) (Hoja 2)) (Tres 'r' 'a' (Hoja 0)(Hoja 1)(Hoja 12))) 
-                    (Dos 'p' (Tres 'n' 'd' (Hoja (-3))(Hoja 4)(Hoja 9)) (Dos 'e' (Hoja 20)(Hoja 7)))
-
