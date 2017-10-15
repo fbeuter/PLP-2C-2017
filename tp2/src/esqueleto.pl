@@ -48,7 +48,15 @@ ubicarBarcos([X | Xs], T) :- X \= 1, matriz(T, _, _), puedoColocar(X, vertical, 
 ubicarBarcos([1 | Xs], T) :- matriz(T, _, _), puedoColocar(1, horizontal, T, F, C), ubicarBarco(1, horizontal, T, F, C), ubicarBarcos(Xs, T).
 ubicarBarcos([], _).
 
+%convertirEnAguaOEsBarco(?Contenido)
+convertirEnAguaOEsBarco(Contenido) :- term_to_atom(Contenido, ~).
+convertirEnAguaOEsBarco(Contenido) :- Contenido == o.
+
+%conAguaOBarco(?Fila)
+conAguaOBarco(Fila) :- maplist(convertirEnAguaOEsBarco, Fila).
+
 %completarConAgua(+?Tablero)
+completarConAgua(Tablero) :- matriz(Tablero,_,_), maplist(conAguaOBarco, Tablero).
 
 %golpear(+Tablero, +NumFila, +NumColumna, -NuevoTab)
 
