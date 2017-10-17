@@ -59,9 +59,25 @@ conAguaOBarco(Fila) :- maplist(convertirEnAguaOEsBarco, Fila).
 completarConAgua(Tablero) :- matriz(Tablero,_,_), maplist(conAguaOBarco, Tablero).
 
 %golpear(+Tablero, +NumFila, +NumColumna, -NuevoTab)
+golpear(T,N,M,TNew) :- matriz(T,Filas,Columnas), enRango(T,N,M), matriz(TNew,Filas,Columnas), 
+	forall(
+		between(1,Filas,I), (
+			forall(
+				between(1,Columnas,J), (
+						((I \= N; J \= M), contenido(T, I, J, Cont), contenido(TNew, I, J, Cont));
+						(I == N, J == M, contenido(TNew, I, J, ~))
+				)
+			) 
+		)
+	).
 
-% Completar instanciación soportada y justificar.
+barcoUnaSolaPieza(T,F,C) :- forall(adyacenteEnRango(T,F,C,F2,C2), contenido(T,F2,C2,~)).
+
+%Completar instanciación soportada y justificar.
 %atacar(Tablero, Fila, Columna, Resultado, NuevoTab)
+atacar(T, F, C, agua, T) :- contenido(T,F,C,~).
+atacar(T, F, C, tocado, TNew) :- contenido(T,F,C,o), adyacenteEnRango(T,F,C,F2,C2), contenido(T,F2,C2,o), golpear(T,F,C,TNew).
+atacar(T, F, C, hundido, TNew) :- contenido(T,F,C,o), barcoUnaSolaPieza(T,F,C), golpear(T,F,C,TNew).
 
 %------------------Tests:------------------%
 
