@@ -82,6 +82,6 @@ atacar(T, F, C, hundido, TNew) :- contenido(T,F,C,o), barcoUnaSolaPieza(T,F,C), 
 %------------------Tests:------------------%
 test(1) :- matriz(M,2,3), adyacenteEnRango(M,2,2,2,3).
 test(2) :- matriz(M,2,3), setof((F,C), adyacenteEnRango(M,1,1,F,C), [ (1, 2), (2, 1), (2, 2)]).
-test(3) :- M = [[0,1],[1,2],[3,4]], contenido(M, 1, 1, 0).
-test(4) :- M = [[o,_],[o,o],[_,_]], completarConAgua(M).
-tests :- forall(between(1,2,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
+test(3) :- contenido([[0,1],[1,2],[3,4]], 1, 1, 0).
+test(4) :- completarConAgua([[o,_],[o,o],[_,_]]).
+tests :- forall(between(1,4,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
