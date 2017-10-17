@@ -59,17 +59,11 @@ conAguaOBarco(Fila) :- maplist(convertirEnAguaOEsBarco, Fila).
 completarConAgua(Tablero) :- matriz(Tablero,_,_), maplist(conAguaOBarco, Tablero).
 
 %golpear(+Tablero, +NumFila, +NumColumna, -NuevoTab)
-golpear(T,N,M,TNew) :- matriz(T,Filas,Columnas), enRango(T,N,M), matriz(TNew,Filas,Columnas), 
-	forall(
-		between(1,Filas,I), (
-			forall(
-				between(1,Columnas,J), (
-						((I \= N; J \= M), contenido(T, I, J, Cont), contenido(TNew, I, J, Cont));
-						(I == N, J == M, contenido(TNew, I, J, ~))
-				)
-			) 
-		)
-	).
+golpear( [Fila|Tablero] , 1 , NumColumna , [FilaNueva|Tablero] ) :- reemplazarColumna(Fila,NumColumna,FilaNueva).
+golpear( [Fila|Tablero] , NumFila , NumColumna , [Fila|TableroNuevo] ) :- NumFila > 1, FilaAnterior is NumFila-1, golpear( Tablero , FilaAnterior , NumColumna , TableroNuevo ).
+
+reemplazarColumna( [_|Cs] , 1 , [~|Cs] ).
+reemplazarColumna( [C|Cs] , NumColumna , [C|Res] ) :- NumColumna > 1, NumColumnaAnterior is NumColumna-1, reemplazarColumna( Cs , NumColumnaAnterior , Res ).
 
 barcoUnaSolaPieza(T,F,C) :- forall(adyacenteEnRango(T,F,C,F2,C2), contenido(T,F2,C2,~)).
 
@@ -79,9 +73,20 @@ atacar(T, F, C, agua, T) :- contenido(T,F,C,~).
 atacar(T, F, C, tocado, TNew) :- contenido(T,F,C,o), adyacenteEnRango(T,F,C,F2,C2), contenido(T,F2,C2,o), golpear(T,F,C,TNew).
 atacar(T, F, C, hundido, TNew) :- contenido(T,F,C,o), barcoUnaSolaPieza(T,F,C), golpear(T,F,C,TNew).
 
+% Ejercicio 8:
+% Por la forma en la que definimos atacar el parametro Tablero es siempre indispensable 
+% ya que por ejemplo es utilizado por contenido que lo requiere. Por otro lado los parametros NumFila y NumColumna
+% son opcionales y esto es interesante ya que dado un tablero utilizando la función atacar se pueden generar
+% todas las posibles jugadas validas y sus resultados (hundido, tocado o agua), mejor aun se puede instanciar resultado
+% para buscar algún par de NumFila y NumColumna de interes.
+
 %------------------Tests:------------------%
 test(1) :- matriz(M,2,3), adyacenteEnRango(M,2,2,2,3).
 test(2) :- matriz(M,2,3), setof((F,C), adyacenteEnRango(M,1,1,F,C), [ (1, 2), (2, 1), (2, 2)]).
 test(3) :- contenido([[0,1],[1,2],[3,4]], 1, 1, 0).
-test(4) :- completarConAgua([[o,_],[o,o],[_,_]]).
-tests :- forall(between(1,4,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
+test(4) :- Tablero = [[o, o], [_, _], [_, o]], completarConAgua(Tablero), Tablero == [[o, o], [~, ~], [~, o]].
+test(5) :- golpear([[o, o], [~, ~], [~, o]],1,2,[[o, ~], [~, ~], [~, o]]).
+test(6) :- golpear([[o, o], [~, ~], [~, o]],2,2,[[o, o], [~, ~], [~, o]]).
+test(7) :- golpear([[o, o], [~, ~], [~, o]],1,2,[[o, ~], [~, ~], [~, o]]).
+test(8) :- atacar([[o, o], [~, ~], [, o]],1,1,tocado,[[~, o], [~, ~], [~, o]]).
+tests :- forall(between(1,8,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
