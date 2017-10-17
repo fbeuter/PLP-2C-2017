@@ -74,7 +74,7 @@ golpear(T,N,M,TNew) :- matriz(T,Filas,Columnas), enRango(T,N,M), matriz(TNew,Fil
 barcoUnaSolaPieza(T,F,C) :- forall(adyacenteEnRango(T,F,C,F2,C2), contenido(T,F2,C2,~)).
 
 %Completar instanciación soportada y justificar.
-%atacar(Tablero, Fila, Columna, Resultado, NuevoTab)
+%atacar(+Tablero,+NumFila,+NumColumna,-Resultado,-NuevoTab)
 atacar(T, F, C, agua, T) :- contenido(T,F,C,~).
 atacar(T, F, C, tocado, TNew) :- contenido(T,F,C,o), adyacenteEnRango(T,F,C,F2,C2), contenido(T,F2,C2,o), golpear(T,F,C,TNew).
 atacar(T, F, C, hundido, TNew) :- contenido(T,F,C,o), barcoUnaSolaPieza(T,F,C), golpear(T,F,C,TNew).
