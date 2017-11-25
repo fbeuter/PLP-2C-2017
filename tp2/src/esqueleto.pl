@@ -24,28 +24,31 @@ adyacenteEnRango(T,F1,C1,F2,C2) :- adyacente(F1,C1,F2,C2), enRango(T,F2,C2).
 %------------------Predicados a definir:------------------%
 
 %contenido(+?Tablero, ?Fila, ?Columna, ?Contenido)
-contenido(T, F, C, Cont) :- matriz(T, _, _), nth1(F, T, FilaT), nth1(C, FilaT, Cont).
+contenido(T, F, C, Cont) :- nth1(F, T, FilaT), nth1(C, FilaT, Cont).
 
 %disponible(+Tablero, ?Fila, ?Columna)
 disponible(T, F, C) :- contenido(T, F, C, Cont), var(Cont), forall(adyacenteEnRango(T,F,C,F1,C1), (contenido(T, F1, C1, Cont2), var(Cont2))).
 
 %puedoColocar(+CantPiezas, ?Direccion, +Tablero, ?Fila, ?Columna)
 puedoColocar(CantPiezas, horizontal, T, F, C) :- 
-	CantPiezas > 0, disponible(T, F, C), CantPiezasm1 is CantPiezas-1, CM1 is C+1, puedoColocar(CantPiezasm1, horizontal, T, F, CM1).
+	piezasDisponibles(T, F, C, CantPiezas, CantPiezasm1), CM1 is C+1, puedoColocar(CantPiezasm1, horizontal, T, F, CM1).
 puedoColocar(CantPiezas, vertical, T, F, C) :- 
-	CantPiezas > 0, disponible(T, F, C), CantPiezasm1 is CantPiezas-1, FM1 is F+1, puedoColocar(CantPiezasm1, vertical, T, FM1, C).
+	piezasDisponibles(T, F, C, CantPiezas, CantPiezasm1), FM1 is F+1, puedoColocar(CantPiezasm1, vertical, T, FM1, C).
 puedoColocar(0, _, _, _, _).
+
+piezasDisponibles(T, F, C, CantPiezas, CantPiezasm1) :- CantPiezas > 0, disponible(T, F, C), CantPiezasm1 is CantPiezas-1.
 
 %ubicarBarcos(+Barcos, +?Tablero)
 ubicarBarco(PiezasBarco, horizontal, T, F, C) :-
-	contenido(T, F, C, o), CM1 is C+1, Pm1 is PiezasBarco-1, ubicarBarco(Pm1, horizontal, T, F, CM1).
+	oContenido(T, F, C, Pm1), CM1 is C+1, ubicarBarco(Pm1, horizontal, T, F, CM1).
 ubicarBarco(PiezasBarco, vertical, T, F, C) :-
-	contenido(T, F, C, o), FM1 is F+1, Pm1 is PiezasBarco-1, ubicarBarco(Pm1, vertical, T, FM1, C).
+	oContenido(T, F, C, Pm1), FM1 is F+1, ubicarBarco(Pm1, vertical, T, FM1, C).
 ubicarBarco(0, _, _, _, _).
 
-ubicarBarcos([X | Xs], T) :- X \= 1, matriz(T, _, _), puedoColocar(X, horizontal, T, F, C), ubicarBarco(X, horizontal, T, F, C), ubicarBarcos(Xs, T).
-ubicarBarcos([X | Xs], T) :- X \= 1, matriz(T, _, _), puedoColocar(X, vertical, T, F, C), ubicarBarco(X, vertical, T, F, C), ubicarBarcos(Xs, T).
-ubicarBarcos([1 | Xs], T) :- matriz(T, _, _), puedoColocar(1, horizontal, T, F, C), ubicarBarco(1, horizontal, T, F, C), ubicarBarcos(Xs, T).
+oContenido(T, F, C, Pm1) :- contenido(T, F, C, o), Pm1 is PiezasBarco-1.
+
+ubicarBarcos([X | Xs], T) :- X >= 1, member(A,[vertical, horizontal]),puedoColocar(X, A, T, F, C), ubicarBarco(X, A, T, F, C), ubicarBarcos(Xs, T).
+ubicarBarcos([1 | Xs], T) :- puedoColocar(1, horizontal, T, F, C), ubicarBarco(1, horizontal, T, F, C), ubicarBarcos(Xs, T).
 ubicarBarcos([], _).
 
 %convertirEnAguaOEsBarco(?Contenido)
@@ -56,7 +59,7 @@ convertirEnAguaOEsBarco(Contenido) :- Contenido == o.
 conAguaOBarco(Fila) :- maplist(convertirEnAguaOEsBarco, Fila).
 
 %completarConAgua(+?Tablero)
-completarConAgua(Tablero) :- matriz(Tablero,_,_), maplist(conAguaOBarco, Tablero).
+completarConAgua(Tablero) :- maplist(conAguaOBarco, Tablero).
 
 %golpear(+Tablero, +NumFila, +NumColumna, -NuevoTab)
 golpear( [Fila|Tablero] , 1 , NumColumna , [FilaNueva|Tablero] ) :- reemplazarColumna(Fila,NumColumna,FilaNueva).
@@ -76,7 +79,7 @@ atacar(T, F, C, hundido, TNew) :- contenido(T,F,C,o), barcoUnaSolaPieza(T,F,C), 
 % Ejercicio 8:
 % Por la forma en la que definimos atacar el parametro Tablero es siempre indispensable 
 % ya que por ejemplo es utilizado por contenido que lo requiere. Por otro lado los parametros NumFila y NumColumna
-% son opcionales y esto es interesante ya que dado un tablero utilizando la función atacar se pueden generar
+% son opcionales y esto es interesante ya que dado un tablero utilizando el predicado atacar se pueden generar
 % todas las posibles jugadas validas y sus resultados (hundido, tocado o agua), mejor aun se puede instanciar resultado
 % para buscar algún par de NumFila y NumColumna de interes.
 
@@ -89,4 +92,4 @@ test(5) :- golpear([[o, o], [~, ~], [~, o]],1,2,[[o, ~], [~, ~], [~, o]]).
 test(6) :- golpear([[o, o], [~, ~], [~, o]],2,2,[[o, o], [~, ~], [~, o]]).
 test(7) :- golpear([[o, o], [~, ~], [~, o]],1,2,[[o, ~], [~, ~], [~, o]]).
 test(8) :- atacar([[o, o], [~, ~], [, o]],1,1,tocado,[[~, o], [~, ~], [~, o]]).
-tests :- forall(between(1,8,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
+tests :- forall(between(1,7,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
