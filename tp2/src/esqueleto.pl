@@ -40,15 +40,15 @@ piezasDisponibles(T, F, C, CantPiezas, CantPiezasm1) :- CantPiezas > 0, disponib
 
 %ubicarBarcos(+Barcos, +?Tablero)
 ubicarBarco(PiezasBarco, horizontal, T, F, C) :-
-	oContenido(T, F, C, Pm1), CM1 is C+1, ubicarBarco(Pm1, horizontal, T, F, CM1).
+	oContenido(T, F, C, PiezasBarco, Pm1), CM1 is C+1, ubicarBarco(Pm1, horizontal, T, F, CM1).
 ubicarBarco(PiezasBarco, vertical, T, F, C) :-
-	oContenido(T, F, C, Pm1), FM1 is F+1, ubicarBarco(Pm1, vertical, T, FM1, C).
+	oContenido(T, F, C, PiezasBarco, Pm1), FM1 is F+1, ubicarBarco(Pm1, vertical, T, FM1, C).
 ubicarBarco(0, _, _, _, _).
 
-oContenido(T, F, C, Pm1) :- contenido(T, F, C, o), Pm1 is PiezasBarco-1.
+oContenido(T, F, C, PiezasBarco, Pm1) :- contenido(T, F, C, o), Pm1 is PiezasBarco-1.
 
-ubicarBarcos([X | Xs], T) :- X >= 1, member(A,[vertical, horizontal]),puedoColocar(X, A, T, F, C), ubicarBarco(X, A, T, F, C), ubicarBarcos(Xs, T).
-ubicarBarcos([1 | Xs], T) :- puedoColocar(1, horizontal, T, F, C), ubicarBarco(1, horizontal, T, F, C), ubicarBarcos(Xs, T).
+ubicarBarcos([X | Xs], T) :- X > 1, member(A,[vertical, horizontal]), puedoColocar(X, A, T, F, C), ubicarBarco(X, A, T, F, C), ubicarBarcos(Xs, T).
+ubicarBarcos([1 | Xs], T) :- member(A,[vertical]), puedoColocar(1, A, T, F, C), ubicarBarco(1, A, T, F, C), ubicarBarcos(Xs, T).
 ubicarBarcos([], _).
 
 %convertirEnAguaOEsBarco(?Contenido)
@@ -84,12 +84,43 @@ atacar(T, F, C, hundido, TNew) :- contenido(T,F,C,o), barcoUnaSolaPieza(T,F,C), 
 % para buscar algún par de NumFila y NumColumna de interes.
 
 %------------------Tests:------------------%
+
+% Tests adyacenteEnRango
 test(1) :- matriz(M,2,3), adyacenteEnRango(M,2,2,2,3).
 test(2) :- matriz(M,2,3), setof((F,C), adyacenteEnRango(M,1,1,F,C), [ (1, 2), (2, 1), (2, 2)]).
+
+% Tests contenido
 test(3) :- contenido([[0,1],[1,2],[3,4]], 1, 1, 0).
-test(4) :- Tablero = [[o, o], [_, _], [_, o]], completarConAgua(Tablero), Tablero == [[o, o], [~, ~], [~, o]].
-test(5) :- golpear([[o, o], [~, ~], [~, o]],1,2,[[o, ~], [~, ~], [~, o]]).
-test(6) :- golpear([[o, o], [~, ~], [~, o]],2,2,[[o, o], [~, ~], [~, o]]).
-test(7) :- golpear([[o, o], [~, ~], [~, o]],1,2,[[o, ~], [~, ~], [~, o]]).
-test(8) :- atacar([[o, o], [~, ~], [, o]],1,1,tocado,[[~, o], [~, ~], [~, o]]).
-tests :- forall(between(1,7,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
+test(4) :- contenido([[0,1],[1,2],[3,4]], 3, 2, 4).
+
+% Tests disponible
+test(5) :- matriz(M,2,4), disponible(M,1,1).
+test(6) :- not(disponible([[_, _, o],[_, _, _]], 2, 2)).
+test(7) :- disponible([[_,_, _], [_,_, _], [_,_, _]], 2, 2).
+test(8) :- disponible([[_,_, _], [_,_, _], [o,o, o]], 1, 1).
+test(9) :- not(disponible([[o,_, _], [_,_, _], [o,o, o]], 1, 1)).
+
+% Tests puedoColocar
+test(10) :- matriz(M, 2, 2), puedoColocar(1, horizontal, M, 1, 1).
+test(11) :- matriz(M, 2, 2), not( puedoColocar(3, horizontal, M, 1, 1) ).
+test(12) :- not( puedoColocar(3, vertical, [[_,_,_], [_,o,_], [_,_,_]], 0, 0)).
+
+% Tests ubicarBarco
+test(13) :- matriz(M,3,3), ubicarBarco(2, horizontal, M, 1, 1), contenido(M, 1, 1, Y), Y==o.
+test(14) :- matriz(M,3,3), contenido(M, 1, 2, o), ubicarBarco(2, horizontal, M, 1, 1), contenido(M, 1, 1, X), contenido(M, 1, 2, Y), X==o, Y==o.
+test(15) :- matriz(M,1,1), not( ubicarBarco(2, horizontal, M, 1, 1) ).
+
+% Tests completarConAgua
+test(16) :- Tablero = [[o, o], [_, _], [_, o]], completarConAgua(Tablero), Tablero == [[o, o], [~, ~], [~, o]].
+
+% Tests golpear
+test(17) :- golpear([[o, o], [~, ~], [~, o]],1,2,[[o, ~], [~, ~], [~, o]]).
+test(18) :- golpear([[o, o], [~, ~], [~, o]],2,2,[[o, o], [~, ~], [~, o]]).
+test(19) :- golpear([[o, o], [~, ~], [~, o]],1,2,[[o, ~], [~, ~], [~, o]]).
+
+% Tests atacar
+test(20) :- atacar([[o, o], [~, ~], [~, o]],1,1,tocado,[[~, o], [~, ~], [~, o]]).
+test(21) :- atacar([[o, o], [~, ~], [~, o]],3,1,agua,[[o, o], [~, ~], [~, o]]).
+test(22) :- atacar([[o, o], [~, ~], [~, o]],3,2,hundido,[[o, o], [~, ~], [~, ~]]).
+
+tests :- forall(between(1,22,N), test(N)).
