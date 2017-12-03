@@ -48,7 +48,9 @@ ubicarBarco(0, _, _, _, _).
 oContenido(T, F, C, PiezasBarco, Pm1) :- contenido(T, F, C, o), Pm1 is PiezasBarco-1.
 
 ubicarBarcos([X | Xs], T) :- X > 1, member(A,[vertical, horizontal]), puedoColocar(X, A, T, F, C), ubicarBarco(X, A, T, F, C), ubicarBarcos(Xs, T).
-ubicarBarcos([1 | Xs], T) :- member(A,[vertical]), puedoColocar(1, A, T, F, C), ubicarBarco(1, A, T, F, C), ubicarBarcos(Xs, T).
+% Como es lo mismo ubicar un barco de tamanio 1 de forma vertical que horizontal, 
+% para evitar soluciones repetidas por defecto los ubicamos de forma vertical
+ubicarBarcos([1 | Xs], T) :- puedoColocar(1, vertical, T, F, C), ubicarBarco(1, vertical, T, F, C), ubicarBarcos(Xs, T).
 ubicarBarcos([], _).
 
 %convertirEnAguaOEsBarco(?Contenido)
